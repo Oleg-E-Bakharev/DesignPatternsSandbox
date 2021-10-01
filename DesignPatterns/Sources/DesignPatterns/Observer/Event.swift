@@ -2,10 +2,12 @@
 //  Created by Oleg Bakharev on 29.09.2021.
 //
 
+/// Шаблон Наблюдатель события
+///  Источник связи "один ко многим".
 public class Event<Param> {
     typealias Handler = EventHandler<Param>
 
-    // Cписок обработчиков.
+    /// Cписок обработчиков.
     private final class Node {
         var handler: Handler
         var next: Node?
@@ -24,7 +26,7 @@ public class Event<Param> {
 
         func step(_ node: Node?) -> Node? {
             guard var current = node else { return nil }
-            // Схлопываем пустые боксы
+            // Схлопываем пустые узлы
             while !current.handler.send(value), let next = current.next {
                 current = next
             }

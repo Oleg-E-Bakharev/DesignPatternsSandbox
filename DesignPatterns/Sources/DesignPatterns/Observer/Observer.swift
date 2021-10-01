@@ -2,8 +2,9 @@
 //  Created by Oleg Bakharev on 29.09.2021.
 //
 
-/// Обработчик события
-public class WeakObserver<Target: AnyObject, Param> : EventHandler<Param> {
+/// Шаблон Наблюдатель события
+///  Слушатель связи "один ко многим".
+public class Observer<Target: AnyObject, Param> : EventHandler<Param> {
     public private(set) weak var target: Target?
 
     public typealias Action = (Target)->(Param)->Void
