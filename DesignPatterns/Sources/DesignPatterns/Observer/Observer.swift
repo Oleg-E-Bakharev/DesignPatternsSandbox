@@ -4,7 +4,7 @@
 
 /// Шаблон Наблюдатель события
 ///  Слушатель связи "один ко многим".
-public class Observer<Target: AnyObject, Param> : EventHandler<Param> {
+public final class Observer<Target: AnyObject, Param> : EventHandler<Param> {
     public private(set) weak var target: Target?
 
     public typealias Action = (Target)->(Param)->Void
@@ -15,7 +15,7 @@ public class Observer<Target: AnyObject, Param> : EventHandler<Param> {
         self.action = action
     }
 
-    public override func send(_ param: Param) -> Bool {
+    public override func handle(_ param: Param) -> Bool {
         guard let target = target else { return false }
         action(target)(param)
         return true

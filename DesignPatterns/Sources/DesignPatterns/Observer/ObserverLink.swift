@@ -4,7 +4,7 @@
 
 /// Посредник (Mediator) для создания обнуляемой связи к постоянному объекту.
 public extension Observer {
-    class Link {
+    final class Link {
         public typealias Action = (Target) -> (Param) -> Void
         weak var target: Target?
         let action: Action

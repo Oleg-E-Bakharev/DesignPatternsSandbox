@@ -3,8 +3,8 @@
 //
 
 public class EventHandler<Param> {
-    /// Послать событие. Воззвращает статус true - слушатель готов волучать дальнейшие события. false - больше не послылать.
-    public func send(_ value: Param) -> Bool {
+    /// Обработать полученное событие. Воззвращает статус true - слушатель готов волучать дальнейшие события. false - больше не послылать.
+    public func handle(_ value: Param) -> Bool {
         fatalError("must override")
     }
 }
