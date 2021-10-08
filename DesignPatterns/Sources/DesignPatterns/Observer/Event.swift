@@ -3,7 +3,7 @@
 //
 
 /// Шаблон Наблюдатель события
-///  Источник связи "один ко многим".
+/// Источник связи "один ко многим".
 public class Event<Param> {
     typealias Handler = EventHandler<Param>
 

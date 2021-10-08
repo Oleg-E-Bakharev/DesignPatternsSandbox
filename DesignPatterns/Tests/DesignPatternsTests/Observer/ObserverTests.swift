@@ -7,21 +7,21 @@ private protocol Source {
 }
 
 private final class Emitter {
-    var voidSource = EventSource<Void>()
-    var intSource = EventSource<Int>()
+    var voidSender = EventSender<Void>()
+    var intSender = EventSender<Int>()
 
     func sendVoid() {
-        voidSource.send()
+        voidSender.send()
     }
 
     func sendInt(_ value: Int) {
-        intSource.send(value)
+        intSender.send(value)
     }
 }
 
 extension Emitter: Source {
-    var eventVoid: Event<Void> { self.voidSource }
-    var eventInt: Event<Int> { self.intSource }
+    var eventVoid: Event<Void> { self.voidSender }
+    var eventInt: Event<Int> { self.intSender }
 }
 
 private final class Handler {
