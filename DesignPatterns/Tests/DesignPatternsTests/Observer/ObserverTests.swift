@@ -1,7 +1,7 @@
 import XCTest
 @testable import DesignPatterns
 
-private protocol Source {
+private protocol Subject {
     var eventVoid: Event<Void> { get }
     var eventInt: Event<Int> { get }
 }
@@ -9,6 +9,8 @@ private protocol Source {
 private final class Emitter {
     var voidSender = EventSender<Void>()
     var intSender = EventSender<Int>()
+    var isVoidEventConnected = false
+    var isIntEventConnected = false
 
     func sendVoid() {
         voidSender.send()
@@ -17,9 +19,23 @@ private final class Emitter {
     func sendInt(_ value: Int) {
         intSender.send(value)
     }
+    
+    init() {
+        voidSender.isConnected += Observer(target: self, action: Emitter.onVoidConnected)
+        intSender.isConnected += Observer(target: self, action: Emitter.onIntConnected)
+    }
+    
+    func onVoidConnected(_ isConnected: Bool) {
+        isVoidEventConnected = isConnected
+    }
+    
+    func onIntConnected(_ isConnected: Bool) {
+        isIntEventConnected = isConnected
+    }
+
 }
 
-extension Emitter: Source {
+extension Emitter: Subject {
     var eventVoid: Event<Void> { self.voidSender }
     var eventInt: Event<Int> { self.intSender }
 }
@@ -39,7 +55,7 @@ final class ObserverTests: XCTestCase {
     func testEventWithoutParams() {
         let e = Emitter()
         let h = Handler()
-        let s: Source = e
+        let s: Subject = e
         s.eventVoid += Observer(target: h, action: Handler.onVoid)
         XCTAssertFalse(h.isHandledVoid)
         e.sendVoid()
@@ -49,7 +65,7 @@ final class ObserverTests: XCTestCase {
     func testEventWithOneParam() {
         let e = Emitter()
         let h = Handler()
-        let s: Source = e
+        let s: Subject = e
         s.eventInt += Observer(target: h, action: Handler.onInt)
         XCTAssertFalse(h.isHandledInt)
         e.sendInt(1)
@@ -58,7 +74,7 @@ final class ObserverTests: XCTestCase {
 
     func testEventWithTwoObservers() {
         let e = Emitter()
-        let s: Source = e
+        let s: Subject = e
         let h1 = Handler()
         let h2 = Handler()
         s.eventVoid += Observer(target: h1, action: Handler.onVoid)
@@ -69,7 +85,7 @@ final class ObserverTests: XCTestCase {
 
     func testEventWithDeadHandler() {
         let e = Emitter()
-        let s: Source = e
+        let s: Subject = e
         var wh: Handler? = Handler()
         let h1 = Handler()
         let h2 = Handler()
@@ -89,7 +105,7 @@ final class ObserverTests: XCTestCase {
 
     func testEventWithLinkHandler() {
         let e = Emitter()
-        let s: Source = e
+        let s: Subject = e
         let h1 = Handler()
         let h2 = Handler()
         let h3 = Handler()
@@ -115,5 +131,24 @@ final class ObserverTests: XCTestCase {
         XCTAssertTrue(h1.isHandledVoid)
         XCTAssertFalse(h2.isHandledVoid)
         XCTAssertTrue(h3.isHandledVoid)
+    }
+    
+    func testIsConnected() {
+        let e = Emitter()
+        var h: Handler? = Handler()
+        let s: Subject = e
+        XCTAssertFalse(e.isIntEventConnected)
+        e.sendInt(0)
+        XCTAssertFalse(e.isIntEventConnected)
+        s.eventInt += Observer(target: h, action: Handler.onInt)
+        XCTAssertTrue(e.isIntEventConnected)
+        e.sendInt(0)
+        XCTAssertTrue(e.isIntEventConnected)
+        h = nil
+        // now s.eventInt considered still connected
+        XCTAssertTrue(e.isIntEventConnected)
+        e.sendInt(0)
+        // new s.eventInt signals that is diconneced
+        XCTAssertFalse(e.isIntEventConnected)
     }
 }

@@ -23,22 +23,33 @@ public class Event<Param> {
     /// При этом все отвалившиеся слушатели удаляются из списка
     /// Недоступна для внешнего вызова. Для внешнего вызова использовать фасад EventSource.
     func notifyHandlers(_ value: Param) {
-        handlers = step(handlers)
+        handlers = recursiveWalk(handlers)
+        if hasConnections && handlers == nil {
+            hasConnections = false
+        }
 
-        func step(_ node: Node?) -> Node? {
-            guard var current = node else { return nil }
+        func recursiveWalk(_ node: Node?) -> Node? {
+            guard node != nil else { return nil }
+            var node = node
             // Схлопываем пустые узлы
-            while !current.handler.handle(value), let next = current.next {
-                current = next
+            while let current = node, !current.handler.handle(value) {
+                node = current.next
             }
-            current.next = step(current.next)
-            return current
+            if let current = node {
+                current.next = recursiveWalk(current.next)
+            }
+            return node
         }
     }
+    
+    var hasConnections = false
 
     /// Добавление слушателя. Слушатель добавляется по слабой ссылке. Чтобы убрать слушателя, надо удалить его объект.
     /// Допустимо применять посредника (Observer.Link) для удаления слушателя без удаления целевого боъекта.
     public static func += (event: Event, handler: EventHandler<Param>) {
+        if !event.hasConnections {
+            event.hasConnections = true
+        }
         event.handlers = Node(handler: handler, next: event.handlers)
     }
 }
