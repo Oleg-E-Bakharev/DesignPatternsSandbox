@@ -151,4 +151,60 @@ final class ObserverTests: XCTestCase {
         // new s.eventInt signals that is diconneced
         XCTAssertFalse(e.isIntEventConnected)
     }
+    
+    func testObserverClosure() {
+        let e = Emitter()
+        let s: Subject = e
+        var isVoidHandled = false
+        var isIntHandled = false
+        s.eventVoid += {
+            isVoidHandled = true
+        }
+        s.eventInt += { value in
+            isIntHandled = true
+            print(value)
+        }
+        e.sendInt(0)
+        e.sendVoid()
+        XCTAssertTrue(isVoidHandled)
+        XCTAssertTrue(isIntHandled)
+    }
+    
+    func testObserverClosureLink() {
+        let e = Emitter()
+        let s: Subject = e
+        var mayBeLink: Any?
+        var isIntHandled1 = false
+        var isIntHandled2 = false
+        var isIntHandled3 = false
+        s.eventInt += {_ in
+            isIntHandled1 = true
+        }
+        do {
+            let link = ObserverClosure.Link { (value: Int) in
+                print(value)
+                isIntHandled2 = true
+            }
+            s.eventInt += link
+            mayBeLink = link
+        }
+        e.sendInt(0)
+        XCTAssertTrue(isIntHandled1)
+        XCTAssertTrue(isIntHandled2)
+        isIntHandled1 = false
+        isIntHandled2 = false
+        XCTAssertNotNil(mayBeLink)
+        mayBeLink = nil
+        s.eventInt += { (value: Int) in
+            print(value)
+            isIntHandled3 = true
+        }
+        // link dead now but 3 handlers
+        e.sendInt(1)
+        // two handlers now
+
+        XCTAssertTrue(isIntHandled1)
+        XCTAssertFalse(isIntHandled2)
+        XCTAssertTrue(isIntHandled3)
+    }
 }
