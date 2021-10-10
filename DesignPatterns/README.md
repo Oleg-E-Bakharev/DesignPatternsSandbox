@@ -4,7 +4,7 @@ Common design patterns.
 
 ## Observer pattern
 Allows to make one-to many weak relationships
-````
+```swift
 protocol Subject {
     var eventVoid: Event<Void> { get }
 }
@@ -34,4 +34,4 @@ func test() {
     e.sendVoid()
     XCTAssertTrue(h.isHandledVoid)
 }
-````
+```
