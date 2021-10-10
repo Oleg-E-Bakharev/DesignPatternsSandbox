@@ -5,10 +5,10 @@
 /// Шаблон Наблюдатель события
 ///  Слушатель связи "один ко многим".
 public final class Observer<Target: AnyObject, Param> : EventHandler<Param> {
-    public private(set) weak var target: Target?
+    weak var target: Target?
 
     public typealias Action = (Target)->(Param)->Void
-    public let action: Action
+    let action: Action
 
     public init(target: Target?, action: @escaping Action) {
         self.target = target
